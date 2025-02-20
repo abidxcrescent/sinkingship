@@ -3,20 +3,25 @@ package com.security.sinkingship.controller;
 
 import com.security.sinkingship.model.Users;
 import com.security.sinkingship.service.UserService;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@AllArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    @Autowired
+    private UserService service;
 
     @PostMapping("/register")
-    public Users registerUser(@RequestBody Users users){
-        return userService.register(users);
+    public Users register(@RequestBody Users user) {
+        return service.register(user);
+
     }
 
+    @PostMapping("/login")
+    public String login(@RequestBody Users user) {
+        return service.verify(user);
+    }
 }

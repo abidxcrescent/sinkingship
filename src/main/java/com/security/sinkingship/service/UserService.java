@@ -2,21 +2,44 @@ package com.security.sinkingship.service;
 
 import com.security.sinkingship.model.Users;
 import com.security.sinkingship.repo.UserRepo;
-import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
 public class UserService {
 
-    private final UserRepo repo;
+    @Autowired
+    private UserRepo repo;
 
-    private final PasswordEncoder encoder;
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JWTService jwtService;
 
     public Users register(Users users) {
-        users.setPassword(encoder.encode(users.getPassword()));
-        return repo.save(users);
+        repo.save(users);
+        return users;
+    }
+
+    /*
+        Passing un authenticated and marking it as authenticated
+     */
+    public String verify(Users user) {
+        Authentication authentication =
+                authenticationManager
+                        .authenticate(
+                                new UsernamePasswordAuthenticationToken(
+                                        user.getUsername(), user.getPassword()));
+
+        if(authentication.isAuthenticated()){
+            return jwtService.generateToken(user.getUsername());
+        }
+        else{
+            return "fail";
+        }
     }
 }
